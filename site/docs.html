@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web2MD API Documentation</title>
+    <meta name="description" content="Complete API documentation for Web2MD - Convert webpages to clean Markdown.">
+    <style>
+        :root { --bg: #0a0a0b; --card: #141416; --border: #27272a; --text: #fafafa; --muted: #a1a1aa; --accent: #6366f1; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; }
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 20px 80px; }
+        h1 { font-size: 2.5rem; margin-bottom: 8px; }
+        h2 { font-size: 1.5rem; margin: 40px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+        h3 { font-size: 1.1rem; margin: 24px 0 8px; color: var(--accent); }
+        p { margin-bottom: 16px; color: var(--muted); }
+        code { background: var(--card); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; font-family: 'SF Mono',monospace; }
+        pre { background: #1a1a1e; border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; margin-bottom: 16px; font-family: 'SF Mono',monospace; font-size: 0.85rem; line-height: 1.6; }
+        pre .comment { color: #6b7280; }
+        pre .keyword { color: #818cf8; }
+        pre .string { color: #34d399; }
+        .endpoint { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin-bottom: 24px; }
+        .endpoint .method { display: inline-block; background: var(--accent); color: white; padding: 2px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 700; margin-right: 8px; }
+        .endpoint .path { font-family: 'SF Mono',monospace; font-size: 0.95rem; }
+        .endpoint .desc { margin-top: 8px; color: var(--muted); font-size: 0.9rem; }
+        nav { padding: 20px 0; border-bottom: 1px solid var(--border); }
+        nav a { color: var(--muted); text-decoration: none; margin-right: 20px; font-size: 0.9rem; }
+        nav a:hover { color: var(--text); }
+        ul { margin-bottom: 16px; padding-left: 20px; }
+        ul li { margin-bottom: 8px; color: var(--muted); }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        th, td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; font-size: 0.9rem; }
+        th { background: var(--card); color: var(--muted); font-weight: 600; }
+        td { color: var(--text); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <a href="/">← Back to Home</a>
+            <a href="#overview">Overview</a>
+            <a href="#endpoints">Endpoints</a>
+            <a href="#examples">Examples</a>
+        </nav>
+
+        <h1>Web2MD API Docs</h1>
+        <p>REST API for converting webpages to clean Markdown. Free tier available — no API key required.</p>
+        <p>Base URL: <code>https://web2md.onrender.com</code></p>
+
+        <h2 id="overview">Overview</h2>
+        <p>The Web2MD API accepts a URL, fetches the webpage, extracts the main content (stripping ads, nav, footers), and returns clean Markdown. Perfect for:</p>
+        <ul>
+            <li>📚 Content aggregation and research</li>
+            <li>🤖 AI/LLM training data pipelines</li>
+            <li>📝 Blog and article backups</li>
+            <li>🔍 SEO content analysis</li>
+        </ul>
+
+        <h2 id="endpoints">API Endpoints</h2>
+
+        <div class="endpoint">
+            <span class="method">POST</span>
+            <span class="path">/convert</span>
+            <div class="desc">Convert a webpage URL to clean Markdown</div>
+        </div>
+
+        <h3>Request Body</h3>
+        <table>
+            <tr><th>Field</th><th>Type</th><th>Required</th><th>Default</th><th>Description</th></tr>
+            <tr><td><code>url</code></td><td>string</td><td>✅</td><td>—</td><td>The full URL of the webpage (must start with http:// or https://)</td></tr>
+            <tr><td><code>include_images</code></td><td>boolean</td><td>❌</td><td><code>false</code></td><td>Include image markdown references in output</td></tr>
+        </table>
+
+        <h3>Response (200 OK)</h3>
+        <table>
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>success</code></td><td>boolean</td><td>Always <code>true</code> on success</td></tr>
+            <tr><td><code>title</code></td><td>string</td><td>Page title from HTML &lt;title&gt; tag</td></tr>
+            <tr><td><code>content</code></td><td>string</td><td>Clean Markdown output of the main content</td></tr>
+            <tr><td><code>url</code></td><td>string</td><td>The original URL (echoed back)</td></tr>
+            <tr><td><code>word_count</code></td><td>integer</td><td>Word count of the markdown content</td></tr>
+            <tr><td><code>char_count</code></td><td>integer</td><td>Character count of the markdown content</td></tr>
+        </table>
+
+        <h3>Error Response (4xx/5xx)</h3>
+        <table>
+            <tr><th>Field</th><th>Type</th><th>Description</th></tr>
+            <tr><td><code>detail</code></td><td>string</td><td>Error description</td></tr>
+        </table>
+
+        <h3>Rate Limiting</h3>
+        <p>Free tier: <strong>100 requests per hour</strong> per IP address. Rate-limited requests return HTTP 429.</p>
+
+        <h2 id="examples">Code Examples</h2>
+
+        <h3>curl</h3>
+        <pre>curl -X POST https://web2md.onrender.com/convert \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://en.wikipedia.org/wiki/Markdown"}'</pre>
+
+        <h3>Python</h3>
+        <pre>import httpx
+
+resp = httpx.post("https://web2md.onrender.com/convert", json={
+    "url": "https://en.wikipedia.org/wiki/Markdown"
+})
+data = resp.json()
+print(f"Title: {data['title']}")
+print(f"Words: {data['word_count']}")
+print(data['content'])</pre>
+
+        <h3>JavaScript (Node.js)</h3>
+        <pre>const resp = await fetch("https://web2md.onrender.com/convert", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url: "https://en.wikipedia.org/wiki/Markdown" })
+});
+const data = await resp.json();
+console.log(data.title, data.content);</pre>
+
+        <h3>With Images Included</h3>
+        <pre>curl -X POST https://web2md.onrender.com/convert \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://en.wikipedia.org/wiki/Image", "include_images": true}'</pre>
+
+        <h2>Health Check</h2>
+        <div class="endpoint">
+            <span class="method" style="background: #22c55e;">GET</span>
+            <span class="path">/health</span>
+            <div class="desc">Returns service health status</div>
+        </div>
+
+        <pre>curl https://web2md.onrender.com/health
+# {"status":"healthy","service":"web2md-api"}</pre>
+
+        <h2>Interactive Docs</h2>
+        <p>Full OpenAPI/Swagger documentation is available at:</p>
+        <ul>
+            <li><a href="https://web2md.onrender.com/docs" style="color: var(--accent);">Swagger UI →</a></li>
+            <li><a href="https://web2md.onrender.com/redoc" style="color: var(--accent);">ReDoc →</a></li>
+        </ul>
+
+        <footer style="margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.85rem;">
+            <p>Need help? <a href="https://github.com/wang4866/api-marketplace/issues" style="color: var(--accent);">Open an issue</a></p>
+        </footer>
+    </div>
+</body>
+</html>

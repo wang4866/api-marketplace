@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-# api-marketplace
-=======
 # Web2MD API
-
 Convert any webpage to clean Markdown. Simple, fast, developer-friendly.
 
 ## Features
@@ -56,4 +52,3 @@ uvicorn app.main:app --reload
 - BeautifulSoup4
 - markdownify
 - httpx
->>>>>>> 2381bc9 (Initial commit: Web2MD API - Convert webpage to Markdown)

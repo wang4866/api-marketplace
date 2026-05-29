@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web2MD API - Convert Webpages to Clean Markdown</title>
+    <meta name="description" content="Convert any webpage to clean, readable Markdown. Simple API for developers, researchers, and content creators.">
+    <style>
+        :root { --bg: #0a0a0b; --card: #141416; --border: #27272a; --text: #fafafa; --muted: #a1a1aa; --accent: #6366f1; --accent-hover: #818cf8; --green: #22c55e; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+        nav { padding: 20px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        nav .logo { font-weight: 700; font-size: 1.2rem; }
+        nav .logo span { color: var(--accent); }
+        nav a { color: var(--muted); text-decoration: none; margin-left: 20px; font-size: 0.9rem; }
+        nav a:hover { color: var(--text); }
+        .hero { padding: 100px 0 60px; text-align: center; }
+        .hero h1 { font-size: 3rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+        .hero h1 span { background: linear-gradient(135deg, var(--accent), #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.15rem; color: var(--muted); max-width: 600px; margin: 0 auto 30px; }
+        .badge { display: inline-flex; gap: 8px; margin-bottom: 24px; }
+        .badge span { background: var(--card); border: 1px solid var(--border); padding: 4px 12px; border-radius: 999px; font-size: 0.8rem; color: var(--muted); }
+        .btn { display: inline-flex; align-items: center; gap: 8px; background: var(--accent); color: white; border: none; padding: 12px 28px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
+        .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn-secondary { background: var(--card); border: 1px solid var(--border); color: var(--text); }
+        .btn-secondary:hover { background: var(--border); }
+        .demo-section { padding: 40px 0 80px; }
+        .demo-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .demo-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .demo-header h3 { font-size: 0.95rem; font-weight: 600; }
+        .demo-header .status { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: var(--muted); }
+        .demo-header .status .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+        .demo-body { padding: 20px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 16px; }
+        .input-group input { flex: 1; background: var(--bg); border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; color: var(--text); font-size: 0.9rem; outline: none; transition: border 0.2s; }
+        .input-group input:focus { border-color: var(--accent); }
+        .input-group input::placeholder { color: var(--muted); }
+        .input-group button { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+        .input-group button:hover { background: var(--accent-hover); }
+        .input-group button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .result-area { display: none; }
+        .result-area.visible { display: block; }
+        .result-meta { display: flex; gap: 16px; margin-bottom: 12px; font-size: 0.8rem; color: var(--muted); }
+        .result-meta span { display: flex; align-items: center; gap: 4px; }
+        .result-content { background: #1a1a1e; border: 1px solid var(--border); border-radius: 8px; padding: 20px; font-family: 'SF Mono','Fira Code','Consolas',monospace; font-size: 0.85rem; line-height: 1.7; white-space: pre-wrap; max-height: 400px; overflow-y: auto; color: #e4e4e7; }
+        .result-actions { display: flex; gap: 8px; margin-top: 12px; }
+        .result-actions button { background: var(--card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; color: var(--text); font-size: 0.8rem; cursor: pointer; }
+        .result-actions button:hover { background: var(--border); }
+        .features { padding: 60px 0; border-top: 1px solid var(--border); }
+        .features h2 { text-align: center; font-size: 2rem; margin-bottom: 40px; }
+        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+        .feature-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+        .feature-card .icon { font-size: 1.5rem; margin-bottom: 12px; }
+        .feature-card h3 { font-size: 1rem; margin-bottom: 8px; }
+        .feature-card p { font-size: 0.85rem; color: var(--muted); }
+        .code-section { padding: 60px 0; border-top: 1px solid var(--border); }
+        .code-section h2 { text-align: center; font-size: 2rem; margin-bottom: 40px; }
+        .code-tabs { display: flex; gap: 2px; margin-bottom: 0; background: var(--card); border: 1px solid var(--border); border-radius: 12px 12px 0 0; overflow: hidden; }
+        .code-tabs button { flex: 1; background: var(--card); border: none; padding: 12px; color: var(--muted); font-size: 0.85rem; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+        .code-tabs button.active { color: var(--accent); border-bottom-color: var(--accent); background: #1a1a1e; }
+        .code-block { display: none; background: #1a1a1e; border: 1px solid var(--border); border-top: none; padding: 20px; font-family: 'SF Mono','Fira Code',monospace; font-size: 0.85rem; line-height: 1.6; overflow-x: auto; color: #e4e4e7; border-radius: 0 0 12px 12px; }
+        .code-block.active { display: block; }
+        .pricing { padding: 60px 0; border-top: 1px solid var(--border); }
+        .pricing h2 { text-align: center; font-size: 2rem; margin-bottom: 40px; }
+        .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 600px; margin: 0 auto; }
+        .plan-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 32px; text-align: center; }
+        .plan-card.featured { border-color: var(--accent); position: relative; }
+        .plan-card.featured::before { content: 'Popular'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); padding: 4px 16px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+        .plan-card h3 { font-size: 1.2rem; margin-bottom: 8px; }
+        .plan-card .price { font-size: 2.5rem; font-weight: 800; margin-bottom: 4px; }
+        .plan-card .price span { font-size: 1rem; color: var(--muted); font-weight: 400; }
+        .plan-card .desc { color: var(--muted); font-size: 0.85rem; margin-bottom: 20px; }
+        .plan-card ul { list-style: none; text-align: left; margin-bottom: 24px; }
+        .plan-card ul li { padding: 6px 0; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; }
+        .plan-card ul li::before { content: '✓'; color: var(--green); font-weight: 700; }
+        footer { padding: 40px 0; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.85rem; }
+        footer a { color: var(--muted); text-decoration: none; }
+        footer a:hover { color: var(--text); }
+        .loading { display: none; text-align: center; padding: 20px; color: var(--muted); }
+        .loading.visible { display: block; }
+        .error-msg { display: none; background: #7f1d1d; border: 1px solid #991b1b; color: #fca5a5; padding: 12px 16px; border-radius: 8px; margin-bottom: 12px; font-size: 0.85rem; }
+        .error-msg.visible { display: block; }
+        @media (max-width: 768px) { .hero h1 { font-size: 2rem; } .features-grid { grid-template-columns: 1fr; } .pricing-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <div class="logo">Web<span>2</span>MD</div>
+            <div>
+                <a href="#demo">Demo</a>
+                <a href="#docs">Docs</a>
+                <a href="#pricing">Pricing</a>
+                <a href="https://github.com/wang4866/api-marketplace" target="_blank">GitHub</a>
+                <a href="/docs">API Docs</a>
+            </div>
+        </nav>
+
+        <section class="hero">
+            <div class="badge">
+                <span>⚡ Fast & Reliable</span>
+                <span>🆓 Free Tier</span>
+                <span>🔌 REST API</span>
+            </div>
+            <h1>Webpage → Markdown<br><span>in one API call</span></h1>
+            <p>Convert any public webpage to clean, readable Markdown. Strip away ads, nav bars, footers — get just the content. Built for AI pipelines, content aggregation, and research.</p>
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <a href="#demo" class="btn">Try Live Demo ↓</a>
+                <a href="https://github.com/wang4866/api-marketplace" class="btn btn-secondary" target="_blank">View on GitHub →</a>
+            </div>
+        </section>
+
+        <section id="demo" class="demo-section">
+            <div class="demo-box">
+                <div class="demo-header">
+                    <h3>🔍 Live Demo</h3>
+                    <div class="status"><span class="dot"></span> API Online</div>
+                </div>
+                <div class="demo-body">
+                    <div class="error-msg" id="error"></div>
+                    <div class="input-group">
+                        <input type="url" id="urlInput" placeholder="Enter a URL... (e.g. https://en.wikipedia.org/wiki/Markdown)" value="https://en.wikipedia.org/wiki/Markdown">
+                        <button id="convertBtn">Convert →</button>
+                    </div>
+                    <div class="loading" id="loading">Converting...</div>
+                    <div class="result-area" id="resultArea">
+                        <div class="result-meta">
+                            <span id="wordCount">📝 0 words</span>
+                            <span id="charCount">📏 0 chars</span>
+                            <span id="sourceUrl">🔗 <a href="#" target="_blank" id="sourceLink" style="color: var(--muted);">source</a></span>
+                        </div>
+                        <div class="result-content" id="resultContent"></div>
+                        <div class="result-actions">
+                            <button onclick="copyResult()">📋 Copy</button>
+                            <button onclick="downloadResult()">⬇ Download .md</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <h2>Why Web2MD?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon">🧹</div>
+                    <h3>Clean Content</h3>
+                    <p>Automatic removal of ads, navigation, footers, and sidebars. Just the content you need.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">⚡</div>
+                    <h3>Blazing Fast</h3>
+                    <p>Sub-second response times. Async architecture with connection pooling for high throughput.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔧</div>
+                    <h3>Developer First</h3>
+                    <p>Simple REST API with curl, Python, JavaScript examples. Swagger docs at `/docs`.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🆓</div>
+                    <h3>Free Tier</h3>
+                    <p>100 requests/hour per IP. No sign-up required to start. Pay only when you scale.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">📝</div>
+                    <h3>Markdown Output</h3>
+                    <p>Clean ATX-style Markdown. Headings, lists, code blocks, links — all preserved.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon">🔗</div>
+                    <h3>Auto-Links</h3>
+                    <p>URLs automatically converted to clickable links. Optional image inclusion mode.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="docs" class="code-section">
+            <h2>Quick Start</h2>
+            <div class="code-tabs">
+                <button class="active" onclick="showTab('curl')">curl</button>
+                <button onclick="showTab('python')">Python</button>
+                <button onclick="showTab('js')">JavaScript</button>
+            </div>
+            <div class="code-block active" id="code-curl">curl -X POST https://web2md.onrender.com/convert \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://example.com/article"}'</div>
+            <div class="code-block" id="code-python">import httpx
+
+resp = httpx.post("https://web2md.onrender.com/convert", json={
+    "url": "https://example.com/article"
+})
+data = resp.json()
+print(data["title"])
+print(data["content"])</div>
+            <div class="code-block" id="code-js">const resp = await fetch("https://web2md.onrender.com/convert", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url: "https://example.com/article" })
+});
+const data = await resp.json();
+console.log(data.title, data.content);</div>
+        </section>
+
+        <section id="pricing" class="pricing">
+            <h2>Simple Pricing</h2>
+            <div class="pricing-grid">
+                <div class="plan-card">
+                    <h3>Free</h3>
+                    <div class="price">$0<span>/mo</span></div>
+                    <div class="desc">For evaluation and small projects</div>
+                    <ul>
+                        <li>100 requests/hour</li>
+                        <li>No API key required</li>
+                        <li>Basic support</li>
+                        <li>Community access</li>
+                    </ul>
+                    <a href="#demo" class="btn" style="width: 100%; justify-content: center;">Try Free</a>
+                </div>
+                <div class="plan-card featured">
+                    <h3>Pro</h3>
+                    <div class="price">$9<span>/mo</span></div>
+                    <div class="desc">For production and business use</div>
+                    <ul>
+                        <li>10,000 requests/day</li>
+                        <li>API key authentication</li>
+                        <li>Priority support</li>
+                        <li>SLA 99.9%</li>
+                    </ul>
+                    <a href="#" class="btn" style="width: 100%; justify-content: center;">Coming Soon</a>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Built by <a href="https://github.com/wang4866">@wang4866</a> · Powered by FastAPI · Open source on <a href="https://github.com/wang4866/api-marketplace">GitHub</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:8000'
+            : 'https://web2md.onrender.com';
+
+        document.getElementById('convertBtn').addEventListener('click', convert);
+
+        // Also convert on Enter
+        document.getElementById('urlInput').addEventListener('keydown', e => {
+            if (e.key === 'Enter') convert();
+        });
+
+        async function convert() {
+            const url = document.getElementById('urlInput').value.trim();
+            if (!url) return;
+
+            const btn = document.getElementById('convertBtn');
+            const loading = document.getElementById('loading');
+            const resultArea = document.getElementById('resultArea');
+            const error = document.getElementById('error');
+
+            btn.disabled = true;
+            loading.classList.add('visible');
+            resultArea.classList.remove('visible');
+            error.classList.remove('visible');
+
+            try {
+                const resp = await fetch(API_URL + '/convert', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json();
+                    throw new Error(err.detail || 'Conversion failed');
+                }
+
+                const data = await resp.json();
+
+                document.getElementById('resultContent').textContent = data.content;
+                document.getElementById('wordCount').innerHTML = `📝 ${data.word_count} words`;
+                document.getElementById('charCount').innerHTML = `📏 ${data.char_count} chars`;
+                document.getElementById('sourceLink').href = data.url;
+                document.getElementById('sourceLink').textContent = new URL(data.url).hostname;
+
+                resultArea.classList.add('visible');
+            } catch (e) {
+                error.textContent = '❌ ' + e.message;
+                error.classList.add('visible');
+            } finally {
+                btn.disabled = false;
+                loading.classList.remove('visible');
+            }
+        }
+
+        function copyResult() {
+            const content = document.getElementById('resultContent').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('Copied!');
+            });
+        }
+
+        function downloadResult() {
+            const content = document.getElementById('resultContent').textContent;
+            const blob = new Blob([content], { type: 'text/markdown' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'web2md-output.md';
+            a.click();
+        }
+
+        function showTab(lang) {
+            document.querySelectorAll('.code-tabs button').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.code-block').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.code-tabs button[onclick*="${lang}"]`)?.classList.add('active');
+            document.getElementById(`code-${lang}`).classList.add('active');
+        }
+
+        // Auto-convert on load with default URL
+        setTimeout(convert, 500);
+    </script>
+</body>
+</html>

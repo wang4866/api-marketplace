@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web2MD API 文档 - 网页转Markdown</title>
+    <meta name="description" content="Web2MD API 完整使用文档。一键将网页URL转为干净Markdown，支持Python、curl、JavaScript。">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%); }
+        .glass-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); }
+        .code-block { background: #1a1a2e; border-radius: 12px; overflow-x: auto; }
+    </style>
+</head>
+<body class="gradient-bg text-gray-100 min-h-screen">
+    <nav class="border-b border-gray-800/50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/api-marketplace/" class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Web2MD</a>
+            <div class="flex gap-4 text-sm">
+                <a href="/api-marketplace/" class="text-gray-400 hover:text-white transition">首页</a>
+                <a href="https://github.com/wang4866/api-marketplace" target="_blank" class="text-gray-400 hover:text-white transition">GitHub</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 py-12">
+        <h1 class="text-4xl font-bold mb-2">API 文档</h1>
+        <p class="text-gray-400 mb-10">Web2MD API — 把任意网页URL转为干净Markdown</p>
+
+        <div class="space-y-10">
+            <!-- 基本信息 -->
+            <section class="glass-card p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold mb-4">基本信息</h2>
+                <div class="grid sm:grid-cols-2 gap-4 text-sm">
+                    <div><span class="text-gray-500">基础URL：</span><code class="text-blue-400">http://localhost:8000</code></div>
+                    <div><span class="text-gray-500">格式：</span><code class="text-blue-400">JSON</code></div>
+                    <div><span class="text-gray-500">方法：</span><code class="text-blue-400">POST</code></div>
+                    <div><span class="text-gray-500">限流：</span><code class="text-blue-400">100次/小时/IP</code></div>
+                </div>
+            </section>
+
+            <!-- 接口端点 -->
+            <section class="glass-card p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold mb-4">接口列表</h2>
+                <div class="space-y-6">
+                    <div>
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="px-2 py-1 bg-green-600 rounded text-xs font-bold">POST</span>
+                            <code class="text-lg font-mono">/convert</code>
+                        </div>
+                        <p class="text-sm text-gray-400 mb-3">把网页URL转为干净Markdown。</p>
+                        <div class="mb-2 text-sm text-gray-300 font-medium">请求参数：</div>
+                        <div class="code-block p-4 text-sm mb-3">
+                            <pre class="text-green-400">{
+  "url": "string (必填)",          // 要转换的网页URL
+  "include_images": false (选填)   // 是否保留图片链接，默认false
+}</pre>
+                        </div>
+                        <div class="mb-2 text-sm text-gray-300 font-medium">返回结果：</div>
+                        <div class="code-block p-4 text-sm">
+                            <pre class="text-green-400">{
+  "success": true,                 // 是否成功
+  "title": "网页标题",              // 提取的标题
+  "content": "# Markdown内容...",   // 干净的Markdown正文
+  "url": "https://...",            // 原始URL
+  "word_count": 1234,              // 字数
+  "char_count": 5678               // 字符数
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-gray-700/50 pt-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="px-2 py-1 bg-blue-600 rounded text-xs font-bold">GET</span>
+                            <code class="text-lg font-mono">/health</code>
+                        </div>
+                        <p class="text-sm text-gray-400">健康检查。返回 <code class="text-blue-400">{"status": "healthy"}</code></p>
+                    </div>
+
+                    <div class="border-t border-gray-700/50 pt-6">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="px-2 py-1 bg-blue-600 rounded text-xs font-bold">GET</span>
+                            <code class="text-lg font-mono">/docs</code>
+                        </div>
+                        <p class="text-sm text-gray-400">Swagger UI 交互式文档。</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 使用示例 -->
+            <section class="glass-card p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold mb-6">使用示例</h2>
+                
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-2">curl（命令行）</h3>
+                    <div class="code-block p-4 text-sm">
+                        <pre class="text-green-400">curl -X POST http://localhost:8000/convert \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://zh.wikipedia.org/wiki/Markdown"}'</pre>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-2">Python</h3>
+                    <div class="code-block p-4 text-sm">
+                        <pre class="text-green-400">import httpx
+
+resp = httpx.post("http://localhost:8000/convert", json={
+    "url": "https://zh.wikipedia.org/wiki/Markdown"
+})
+data = resp.json()
+print(data["title"])
+print(data["content"])</pre>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">JavaScript</h3>
+                    <div class="code-block p-4 text-sm">
+                        <pre class="text-green-400">const resp = await fetch("http://localhost:8000/convert", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({
+    url: "https://zh.wikipedia.org/wiki/Markdown"
+  })
+});
+const data = await resp.json();
+console.log(data.title, data.content);</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 错误处理 -->
+            <section class="glass-card p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold mb-4">错误处理</h2>
+                <div class="space-y-3 text-sm">
+                    <div class="flex gap-2">
+                        <span class="text-yellow-400 font-mono min-w-[80px]">400</span>
+                        <span>URL格式错误或无法访问 — 检查URL是否正确</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="text-red-400 font-mono min-w-[80px]">429</span>
+                        <span>请求太频繁，超过每小时100次限流 — 等待后重试</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="text-red-400 font-mono min-w-[80px]">500</span>
+                        <span>服务内部错误 — 重试或联系开发者</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 部署指南 -->
+            <section class="glass-card p-6 rounded-2xl">
+                <h2 class="text-2xl font-bold mb-4">部署指南</h2>
+                <p class="text-sm text-gray-400 mb-4">项目开源，可以一键部署到任何平台：</p>
+                <div class="space-y-3 text-sm">
+                    <div class="flex gap-2">
+                        <span class="text-blue-400 font-mono min-w-[100px]">Render</span>
+                        <span>push到GitHub → Render自动检测render.yaml → 自动部署</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="text-blue-400 font-mono min-w-[100px]">Railway</span>
+                        <span>导入GitHub仓库 → 设置启动命令: <code class="text-blue-400">uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="text-blue-400 font-mono min-w-[100px]">VPS</span>
+                        <span>拉取代码 → pip install -r requirements.txt → uvicorn app.main:app</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <footer class="border-t border-gray-800/50 py-8 text-center text-sm text-gray-600">
+        <p>Web2MD API · 开源在 <a href="https://github.com/wang4866/api-marketplace" target="_blank" class="text-blue-400 hover:text-blue-300">GitHub</a></p>
+    </footer>
+</body>
+</html>

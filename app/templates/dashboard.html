@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Marketplace — 管理后台</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --accent: #6366f1;
+    --text: #e1e4ed;
+    --muted: #8b8fa3;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #eab308;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); padding: 24px;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 24px; margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+  h1 small { font-size: 14px; color: var(--muted); font-weight: 400; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 20px; position: relative;
+  }
+  .card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .card .value { font-size: 32px; font-weight: 700; margin-top: 8px; }
+  .card .sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .stat-row { display: flex; gap: 24px; margin-top: 8px; flex-wrap: wrap; }
+  .stat-item { font-size: 13px; }
+  .stat-item strong { color: var(--text); }
+  table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  th { text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .tier-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;
+  }
+  .tier-free { background: #1a3a2a; color: var(--green); }
+  .tier-starter { background: #1a2a3a; color: #60a5fa; }
+  .tier-pro { background: #2a1a3a; color: #c084fc; }
+  .tier-enterprise { background: #3a2a1a; color: var(--yellow); }
+  .online { color: var(--green); }
+  .offline { color: var(--red); }
+  .refresh { position: absolute; top: 16px; right: 16px; font-size: 12px; color: var(--accent); cursor: pointer; }
+  .error { color: var(--red); padding: 20px; text-align: center; }
+  .section-title { font-size: 16px; font-weight: 600; margin: 24px 0 12px; color: var(--text); }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>📊 API Marketplace <small>管理后台</small></h1>
+  
+  <div id="content">
+    <div class="error">加载中...</div>
+  </div>
+</div>
+
+<script>
+async function load() {
+  try {
+    // Fetch all data
+    const [health, models, pricing, keyInfo] = await Promise.all([
+      fetch('/health').then(r => r.json()),
+      fetch('/v1/models').then(r => r.json()),
+      fetch('/pricing').then(r => r.json()),
+      fetch('/key/info', { headers: { 'X-API-Key': '@admin' } }).then(r => r.ok ? r.json() : null)
+    ]);
+
+    // Check Ollama
+    let ollamaOk = false, ollamaModels = 0;
+    try {
+      const r = await fetch('/v1/models');
+      if (r.ok) { const d = await r.json(); ollamaOk = true; ollamaModels = d.data?.length || 0; }
+    } catch {}
+
+    const modelCount = models.data?.length || 0;
+    const tierCount = Object.keys(pricing.tiers || {}).length;
+
+    document.getElementById('content').innerHTML = `
+      <!-- Stats Grid -->
+      <div class="grid">
+        <div class="card">
+          <div class="label">服务状态</div>
+          <div class="value ${health.status === 'healthy' ? 'online' : 'offline'}">${health.status === 'healthy' ? '● 在线' : '● 离线'}</div>
+          <div class="sub">${health.service || 'API Marketplace'}</div>
+        </div>
+        <div class="card">
+          <div class="label">Ollama 状态</div>
+          <div class="value ${ollamaOk ? 'online' : 'offline'}">${ollamaOk ? '● 在线' : '● 离线'}</div>
+          <div class="sub">${ollamaModels} 个可用模型</div>
+        </div>
+        <div class="card">
+          <div class="label">API 端点</div>
+          <div class="value">10</div>
+          <div class="sub">3 个产品线</div>
+        </div>
+        <div class="card">
+          <div class="label">定价层级</div>
+          <div class="value">${tierCount}</div>
+          <div class="sub">Free / Starter / Pro / Enterprise</div>
+        </div>
+      </div>
+
+      <!-- Products -->
+      <div class="section-title">📦 产品线</div>
+      <div class="grid">
+        <div class="card">
+          <div class="label">Web2MD 转换器</div>
+          <div class="value" style="font-size:20px">网页 → Markdown</div>
+          <div class="sub">POST /convert · POST /batch<br>Free 100次/天</div>
+        </div>
+        <div class="card">
+          <div class="label">Chat Proxy</div>
+          <div class="value" style="font-size:20px">OpenAI 兼容 LLM</div>
+          <div class="sub">POST /v1/chat/completions<br>SSE 流式 · 11个模型</div>
+        </div>
+        <div class="card">
+          <div class="label">Embeddings API</div>
+          <div class="value" style="font-size:20px">向量嵌入 1024维</div>
+          <div class="sub">POST /v1/embeddings<br>\$0.10/1M tokens — 比 OpenAI 便宜</div>
+        </div>
+      </div>
+
+      <!-- Model List -->
+      <div class="section-title">🤖 可用模型 (${modelCount})</div>
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th>模型</th><th>层级</th><th>价格</th></tr>
+          </thead>
+          <tbody>
+            ${(models.data || []).map(m => `
+              <tr>
+                <td><code style="font-size:13px">${m.id}</code></td>
+                <td><span class="tier-badge tier-${m.tier_required}">${m.tier_required}</span></td>
+                <td>$${(m.cost_per_1k_tokens_usd || 0).toFixed(3)}/1K tokens</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pricing -->
+      <div class="section-title">💰 定价方案</div>
+      <div class="card" style="padding:0; overflow-x:auto;">
+        <table>
+          <thead><tr><th>方案</th><th>价格</th><th>配额</th></tr></thead>
+          <tbody>
+            ${Object.entries(pricing.tiers || {}).map(([t, info]) => `
+              <tr>
+                <td><span class="tier-badge tier-${t}">${t}</span></td>
+                <td>${info.price ? '$' + info.price : '免费'}</td>
+                <td>${info.requests_per_day ? info.requests_per_day + '次/天' : '无限制'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <p style="text-align:center; color:var(--muted); font-size:12px; margin-top:32px;">
+        API Marketplace · 本地部署 · auto-reload in 15s
+      </p>
+    `;
+  } catch (e) {
+    document.getElementById('content').innerHTML = `<div class="error">❌ 无法连接 API: ${e.message}</div>`;
+  }
+}
+
+load();
+setInterval(load, 15000);
+</script>
+</body>
+</html>

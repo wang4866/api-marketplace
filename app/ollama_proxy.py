@@ -2,6 +2,7 @@
 Ollama Chat Proxy — 把本地Ollama模型包装成OpenAI兼容API，带API Key计费。
 支持流式SSE返回。
 """
+import os
 import httpx
 import json
 import time
@@ -15,7 +16,7 @@ from .payment import validate_key, record_usage
 
 router = APIRouter(prefix="/v1", tags=["Ollama Chat Proxy"])
 
-OLLAMA_BASE = "http://localhost:11434"
+OLLAMA_BASE = os.environ.get("OLLAMA_BASE", "http://localhost:11434")
 
 # Model → tier mapping
 MODEL_TIERS = {

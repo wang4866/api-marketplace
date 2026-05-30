@@ -271,6 +271,15 @@ async def admin_dashboard():
     return HTMLResponse("<h1>Dashboard not found</h1>", status_code=404)
 
 
+@app.get("/deploy")
+async def deploy_guide():
+    """Deployment guide (HTML)."""
+    html_path = _HTML_DIR / "deploy-guide.html"
+    if html_path.exists():
+        return HTMLResponse(content=html_path.read_text(encoding="utf-8"), status_code=200)
+    return HTMLResponse("<h1>Guide not found</h1>", status_code=404)
+
+
 # --- Run ---
 if __name__ == "__main__":
     import uvicorn

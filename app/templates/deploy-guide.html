@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Marketplace — 部署指南</title>
+<style>
+  :root {
+    --bg: #0f1117; --card: #1a1d27; --border: #2a2d3a;
+    --accent: #6366f1; --text: #e1e4ed; --muted: #8b8fa3;
+    --green: #22c55e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg); color: var(--text); padding: 32px; line-height: 1.7;
+  }
+  .container { max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 28px; margin-bottom: 8px; }
+  h2 { font-size: 20px; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 16px; margin: 24px 0 8px; color: var(--accent); }
+  p { margin: 8px 0; color: #c0c4d0; }
+  code {
+    background: #1e2230; padding: 2px 6px; border-radius: 4px;
+    font-size: 14px; font-family: 'SF Mono', 'Cascadia Code', monospace;
+  }
+  pre {
+    background: #1e2230; padding: 16px; border-radius: 8px;
+    overflow-x: auto; font-size: 13px; border: 1px solid var(--border);
+    margin: 12px 0;
+  }
+  .step { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 16px 0; }
+  .step-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: white; font-weight: 700; font-size: 14px;
+    margin-right: 10px;
+  }
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 12px 0; }
+  .status-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .status-item .label { font-size: 12px; color: var(--muted); }
+  .status-item .val { font-size: 20px; font-weight: 600; margin-top: 4px; }
+  .online { color: var(--green); }
+  a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🚀 API Marketplace — 部署指南</h1>
+<p>一小时内上线三个API产品，开始收费。</p>
+
+<h2>📋 上线前检查清单</h2>
+<div class="status-grid">
+  <div class="status-item"><div class="label">产品线</div><div class="val online">3个</div></div>
+  <div class="status-item"><div class="label">API端点</div><div class="val online">11个</div></div>
+  <div class="status-item"><div class="label">GitHub</div><div class="val online">已推送</div></div>
+  <div class="status-item"><div class="label">定价</div><div class="val online">4级就绪</div></div>
+</div>
+
+<h2 id="option1">🛤️ 方案一：Render 一键部署（推荐）</h2>
+
+<div class="step">
+  <span class="step-num">1</span>
+  <strong>注册 Render 账号</strong>
+  <p>访问 <a href="https://render.com" target="_blank">render.com</a> → 用 GitHub 登录</p>
+</div>
+
+<div class="step">
+  <span class="step-num">2</span>
+  <strong>新建 Web Service</strong>
+  <p>Dashboard → <strong>New + → Web Service</strong></p>
+  <p>Connect repository → 选择 <code>wang4866/api-marketplace</code></p>
+  <p>或者手动指定: <code>https://github.com/wang4866/api-marketplace</code></p>
+</div>
+
+<div class="step">
+  <span class="step-num">3</span>
+  <strong>填写配置</strong>
+  <pre>Name: api-marketplace
+Runtime: Python 3
+Build Command: pip install -r requirements.txt
+Start Command: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+Instance Type: Free</pre>
+</div>
+
+<div class="step">
+  <span class="step-num">4</span>
+  <strong>设置环境变量</strong>
+  <pre>OLLAMA_BASE: https://your-ollama-server.com:11434</pre>
+  <p>⚠️ Chat Proxy 和 Embeddings 需要连接一个远程 Ollama 实例。</p>
+  <p>选项：</p>
+  <ul style="margin-left:20px;color:#c0c4d0">
+    <li>在同一台 Render 上部署 Ollama（需要 Docker compose）</li>
+    <li>使用自己的服务器上跑 Ollama，暴露 API</li>
+    <li>暂时只上线 Web2MD（不需要 Ollama）</li>
+  </ul>
+</div>
+
+<div class="step">
+  <span class="step-num">5</span>
+  <strong>部署</strong>
+  <p>点击 <strong>Deploy</strong> → 等 2-3 分钟 → 上线！</p>
+  <p>你的 API 地址: <code>https://api-marketplace.onrender.com</code></p>
+</div>
+
+<h2 id="option2">🛤️ 方案二：Railway 部署</h2>
+
+<div class="step">
+  <span class="step-num">1</span>
+  <strong>注册 Railway</strong>
+  <p><a href="https://railway.app" target="_blank">railway.app</a> → 用 GitHub 登录</p>
+</div>
+
+<div class="step">
+  <span class="step-num">2</span>
+  <strong>New Project → Deploy from GitHub repo</strong>
+  <p>选择 <code>wang4866/api-marketplace</code></p>
+  <p>Start Command: <code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></p>
+</div>
+
+<h2 id="option3">🛤️ 方案三：RapidAPI 上架</h2>
+<p>RapidAPI 可以让开发者发现和购买你的 API。</p>
+<div class="step">
+  <p>1. 注册 <a href="https://rapidapi.com" target="_blank">rapidapi.com</a></p>
+  <p>2. 进入 Provider Dashboard → <strong>Add New API</strong></p>
+  <p>3. 上传 OpenAPI 规范：</p>
+  <pre>curl http://localhost:8000/openapi.json > openapi.json</pre>
+  <p>4. 设置定价方案，参考已有方案：</p>
+  <pre>Free: 100 次/天
+Starter: $9.99/月 - 1000 次/天
+Pro: $29.99/月 - 10000 次/天
+Enterprise: $99.99/月 - 无限制</pre>
+</div>
+
+<h2>💰 第一个客户怎么来</h2>
+<ul style="margin-left:20px;color:#c0c4d0">
+  <li><strong>HuggingFace 社区</strong> — 发帖 "I built an open-source web-to-markdown API"</li>
+  <li><strong>Reddit r/webdev / r/programming</strong> — 自荐</li>
+  <li><strong>Twitter/X</strong> — 发 Demo 视频</li>
+</ul>
+
+<h2>🔧 本地管理</h2>
+<pre># 本地已运行
+curl http://localhost:8000        # API 根
+curl http://localhost:8000/admin  # 管理面板
+curl http://localhost:8000/health # 健康检查
+
+# 创建 Pro API Key
+curl -X POST http://localhost:8000/key/create \
+  -H "Content-Type: application/json" \
+  -d '{"tier": "pro", "email": "user@example.com"}'
+
+# 测试（替换为你的 key）
+curl -X POST http://localhost:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: w2md_xxxxxxxxxx" \
+  -d '{"model": "qwen2.5:7b", "messages": [{"role":"user","content":"你好"}]}'</pre>
+
+<p style="text-align:center; color:var(--muted); margin-top:48px;">
+  API Marketplace v1.0 · 所有代码已推送到 GitHub<br>
+  <a href="https://github.com/wang4866/api-marketplace" target="_blank">github.com/wang4866/api-marketplace</a>
+</p>
+
+</div>
+</body>
+</html>

@@ -2,6 +2,7 @@
 Embeddings API — 本地bge-m3模型包装成OpenAI text-embedding-ada-002兼容接口。
 定价：$0.01/1K tokens (对比OpenAI $0.13/1M tokens，我们便宜13倍)
 """
+import os
 import httpx
 import json
 import time
@@ -13,7 +14,7 @@ from .payment import validate_key, record_usage
 
 router = APIRouter(prefix="/v1", tags=["Embeddings"])
 
-OLLAMA_BASE = "http://localhost:11434"
+OLLAMA_BASE = os.environ.get("OLLAMA_BASE", "http://localhost:11434")
 EMBEDDING_MODEL = "bge-m3:latest"
 
 # Free users get 100K tokens/day, paid users unlimited

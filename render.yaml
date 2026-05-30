@@ -1,8 +1,11 @@
 services:
   - type: web
-    name: web2md-api
-    runtime: python
-    plan: free
-    autoDeploy: true
+    name: api-marketplace
+    env: python
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: OLLAMA_BASE
+        value: http://ollama-service:11434
+      - key: PYTHON_VERSION
+        value: 3.11

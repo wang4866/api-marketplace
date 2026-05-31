@@ -1,124 +1,61 @@
-# Web2MD API — 网页转Markdown
+# Local AI Proxy
 
-一键将任意网页URL转换为干净的Markdown格式。自动去除广告、导航栏、侧边栏，只保留正文内容。
+**Turn your local Ollama into a production-ready OpenAI-compatible API. One command, zero cloud.**
 
-🌐 **在线体验**: https://wang4866.github.io/api-marketplace/  
-📘 **API文档**: https://wang4866.github.io/api-marketplace/docs.html  
-💻 **技术栈**: FastAPI + BeautifulSoup + markdownify + httpx
+```
+pip install local-ai-proxy
+local-ai
+```
 
----
+## Features
 
-## 快速开始
+- **OpenAI-compatible API** - Use any OpenAI SDK with `base_url=http://localhost:8000/v1`
+- **11 local models** - qwen3.5, gemma4, llama3.2, bge-m3 embeddings
+- **Streaming SSE** - Real-time chat output
+- **4 pricing tiers** - Free to Enterprise-ready
+- **Usage tracking** - Built-in API key system with SQLite
+- **SSD latency** - No network round-trips
+- **Privacy** - Your data never leaves your machine
+
+## Quick Start
 
 ```bash
-# 克隆项目
-git clone https://github.com/wang4866/api-marketplace.git
-cd api-marketplace
+# Install
+pip install local-ai-proxy
 
-# 安装依赖
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+# Start (macOS)
+local-ai serve
 
-# 启动服务
-cd app
-uvicorn main:app --host 0.0.0.0 --port 8000
+# List models
+local-ai models
 
-# 测试
-curl -X POST http://localhost:8000/convert \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://zh.wikipedia.org/wiki/Markdown"}'
+# Chat
+local-ai chat "What is the meaning of life?"
+
+# Embeddings
+local-ai embed "Hello world"
+
+# Open dashboard
+local-ai dashboard
 ```
 
-## API 接口
+## Use with any OpenAI SDK
 
-### POST /convert
-把网页URL转为干净Markdown。
-
-**请求参数:**
-```json
-{
-  "url": "https://example.com/article",     // 必填：要转换的网页URL
-  "include_images": false                    // 选填：是否保留图片链接
-}
-```
-
-**返回结果:**
-```json
-{
-  "success": true,
-  "title": "文章标题",
-  "content": "# Markdown正文...",
-  "url": "https://example.com/article",
-  "word_count": 1200,
-  "char_count": 8000
-}
-```
-
-### GET /health
-健康检查，返回 `{"status": "healthy"}`
-
-### GET /docs
-Swagger UI 交互式文档
-
-## 使用示例
-
-### Python
 ```python
-import httpx
-
-resp = httpx.post("http://localhost:8000/convert", json={
-    "url": "https://zh.wikipedia.org/wiki/Python"
-})
-data = resp.json()
-print(data["title"])
-print(data["content"])
+from openai import OpenAI
+client = OpenAI(base_url="http://localhost:8000/v1", api_key="sk-local")
+response = client.chat.completions.create(
+    model="qwen2.5:7b",
+    messages=[{"role": "user", "content": "Hello!"}]
+)
+print(response.choices[0].message.content)
 ```
 
-### JavaScript
-```javascript
-const resp = await fetch("http://localhost:8000/convert", {
-  method: "POST",
-  headers: {"Content-Type": "application/json"},
-  body: JSON.stringify({url: "https://zh.wikipedia.org/wiki/Python"})
-});
-const data = await resp.json();
-```
+## Support
 
-## 部署
+If this tool saves you time or money, consider donating:
 
-### Render (推荐)
-项目根目录包含 `render.yaml`，push到GitHub后Render会自动部署。
+- **USDT (TRC20):** `0x85Ea457bE39E42C05D296D9b526e03a68D48A1f`
+- **GitHub Sponsors:** https://github.com/sponsors/wang4866
 
-### Railway
-1. 导入GitHub仓库
-2. 设置启动命令: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-
-### VPS
-```
-pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000
-```
-
-## 项目结构
-```
-api-marketplace/
-├── app/
-│   ├── main.py          # FastAPI应用入口
-│   ├── web_to_md.py     # 网页转Markdown核心逻辑
-│   └── __init__.py
-├── site/
-│   ├── index.html       # 中文静态首页
-│   ├── docs.html        # 中文API文档
-│   └── vercel.json      # Vercel配置
-├── requirements.txt
-├── render.yaml          # Render部署配置
-├── deploy.sh            # 部署脚本
-└── README.md
-```
-
-## 限流
-每个IP每小时100次请求，无需注册即可使用。
-
-## 开源协议
-MIT
+Built with :heart: by Hermes Agent. MIT License.
